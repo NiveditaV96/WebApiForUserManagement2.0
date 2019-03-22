@@ -1,5 +1,8 @@
+#To ignore files which is generated after code is compiled
 *.dll
 [Bb]in/
 [Oo]bj/
+
+#To ignore NuGet packages
 *.nupkg
 **/[Pp]ackages/*
