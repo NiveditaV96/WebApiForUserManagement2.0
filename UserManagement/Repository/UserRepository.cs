@@ -55,7 +55,10 @@ namespace UserManagement.Repository
 
                         if (userRowsAffected == 0)
                         {
+                            _log.Info("User table not affected");
                             return (int)userCreateStatus.UserCreationFailed;
+
+                          
                         }
 
                         else if(userRowsAffected!=0)
@@ -65,6 +68,7 @@ namespace UserManagement.Repository
 
                             if (membesrshipRowsAffected == 0)
                             {
+                                _log.Info("Membership table not affected");
                                 return (int)userCreateStatus.PasswordCreationFailed;
                             }
 
@@ -75,6 +79,7 @@ namespace UserManagement.Repository
 
                                 if (roleRowsAffected == 0)
                                 {
+                                    _log.Info("Roles table not affected");
                                     return (int)userCreateStatus.RoleCreationFailed;
                                 }
 
@@ -107,58 +112,7 @@ namespace UserManagement.Repository
         }
 
 
-        //public bool ValidateUser(string Username, string Password)
-        //{
-
-        //    string unm = Username;
-        //    string pwd = Password;
-        //    string usernameQuery = "select count([UserName]) from aspnet_Users where UserName = '" + Username + "'";
-        //    string passwordQuery = "select count([Password]) from aspnet_Membership  where Password = '" + Password + "'";
-
-        //    try
-        //    {
-        //        using (SqlConnection con = new SqlConnection(connectionString))
-        //        {
-
-        //            //UserModel userr = new UserModel();
-        //            //string login_Query = "select [UserName] from aspnet_Users where UserName = '" + Username + "'";
-        //            SqlCommand cmd = new SqlCommand(usernameQuery, con);
-        //            con.Open();
-        //            int userRowCount = (int)cmd.ExecuteScalar();
-        //            if (userRowCount == 1)
-        //            {
-        //                userStatus = true;
-        //            }
-        //        }
-
-        //        using (SqlConnection con = new SqlConnection(connectionString))
-        //        {
-
-        //            //UserModel userr = new UserModel();
-        //            //string login_Query = "select [UserName] from aspnet_Users where UserName = '" + Username + "'";
-        //            SqlCommand cmd = new SqlCommand(passwordQuery, con);
-        //            con.Open();
-        //            int pwdRowCount = (int)cmd.ExecuteScalar();
-        //            if (pwdRowCount == 1)
-        //            {
-        //                pwdStatus = true;
-        //            }
-        //        }
-
-        //        if (userStatus == true && pwdStatus == true)
-
-        //            return true;
-
-        //        else
-        //            return false;
-        //    }
-
-        //    catch(Exception e)
-        //    {
-        //        throw e;
-        //    }
-
-        //}
+        
 
         
         /// <summary>
@@ -225,11 +179,16 @@ namespace UserManagement.Repository
      /// <returns></returns>
     public bool UpdateUserName(string currentUsername, string newUsername)
     {
+
+            UserModel user = new UserModel();
+            user.Username = newUsername;
+
             string updateUserNameQuery = "update[dbo].[aspnet_Users]" +
-                                         "set [UserName] = '" + newUsername + "', [LoweredUserName] = lower('" + newUsername + "')" +
+                                         "set [UserName] = '" + user.Username + "', [LoweredUserName] = lower('" + user.Username + "')" +
                                          "where [ApplicationId] = (select [ApplicationId] from [dbo].[aspnet_Applications] " +
                                          "where [ApplicationName]='UserApplication')" +
                                          "and [UserName] = '" + currentUsername + "'";
+
 
             try
             {
@@ -241,7 +200,7 @@ namespace UserManagement.Repository
                         int rowUpdateCount = cmdUpdaterUsername.ExecuteNonQuery();
                         if (rowUpdateCount != 0)
                         {
-                            _log.Info("Reeived request for Update Username");
+                            _log.Info("Received request for Updating Username");
                             return true;
                         }
 
@@ -288,6 +247,7 @@ namespace UserManagement.Repository
                         int rowUpdateCount = cmdUpdaterUserRole.ExecuteNonQuery();
                         if (rowUpdateCount != 0)
                         {
+                            _log.Info("Requested for user role updation.");
                             return true;
                         }
                         else
@@ -322,9 +282,9 @@ namespace UserManagement.Repository
                                     "where u.UserName='"+ userName + "' and "+
                                     "a.ApplicationId = (select ApplicationId from [dbo].[aspnet_Applications] where ApplicationName = 'UserApplication')";
 
-            string deleteUserFromUsersInRolesQuery = "delete from aspnet_UsersInRoles where UserId = '" + user.UserID + "'";
-            string deleteUserFromMembershipQuery = "delete from aspnet_Membership where UserId = '" + user.UserID + "'";
-            string deleteUserFromUsersQuery = "delete from aspnet_Users where UserId = '" + user.UserID + "'";
+            //string deleteUserFromUsersInRolesQuery = "delete from aspnet_UsersInRoles where UserId = '" + user.UserID + "'";
+            //string deleteUserFromMembershipQuery = "delete from aspnet_Membership where UserId = '" + user.UserID + "'";
+            //string deleteUserFromUsersQuery = "delete from aspnet_Users where UserId = '" + user.UserID + "'";
 
             try
             {
@@ -349,6 +309,10 @@ namespace UserManagement.Repository
 
                         }
                         dr.Close();
+
+                        string deleteUserFromUsersInRolesQuery = "delete from aspnet_UsersInRoles where UserId = '" + user.UserID + "'";
+                        string deleteUserFromMembershipQuery = "delete from aspnet_Membership where UserId = '" + user.UserID + "'";
+                        string deleteUserFromUsersQuery = "delete from aspnet_Users where UserId = '" + user.UserID + "'";
 
                         cmdDeleteUser.CommandText = deleteUserFromUsersInRolesQuery;
                         cmdDeleteUser.ExecuteNonQuery();
@@ -403,20 +367,13 @@ namespace UserManagement.Repository
 
                     //Object[] username = new Object[dr.FieldCount];
 
-
-                    
-                    foreach (string username in usernameList)
-                    {
-
-                    }
-
                     while (dr.Read())
                     {
                         string username = dr["UserName"].ToString();
                         usernameList.Add(username);
                         //int count = dr.GetValues(username);
                     }
-
+                    _log.Info("user list based on role to be displayed.");
                     return usernameList;
                 }
             }

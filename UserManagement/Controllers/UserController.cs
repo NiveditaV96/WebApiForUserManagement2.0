@@ -28,23 +28,22 @@ namespace UserManagement.Controllers
             _irepository = irepository;
         }
         
-        //include exception handling here 
-        //make a separate ctlr for login
 
         [Route("Create")]
         [HttpPost]
-
-        //public IHttpActionResult Create([FromBody](string username,string password,string role))
-        //public IHttpActionResult Create(string username, string password, string role)
         public IHttpActionResult UserCreation([FromBody]JObject data)
         {
             try
             {
-                
-               UserModel user = data["Username"].ToObject<UserModel>();
-               MembershipModel membership = data["Password"].ToObject<MembershipModel>();
-               RoleModel role = data["RoleName"].ToObject<RoleModel>();
-                
+
+                UserModel user = new UserModel();
+                MembershipModel membership = new MembershipModel();
+                RoleModel role = new RoleModel();
+
+                user.Username = (string)data["Username"];
+                membership.Password = (string)data["Password"];
+                role.RoleName = (string)data["RoleName"];
+
                 var creationStatus = _irepository.CreateUser(user.Username, membership.Password, role.RoleName);
 
                 if (creationStatus == 0)
@@ -73,48 +72,17 @@ namespace UserManagement.Controllers
             catch(Exception)
             {
                 throw;
-                //              System.Resources.MissingManifestResourceException occurred
-                //HResult = 0x80131532
-
-                
-
-
-
-                //throw new InvalidOperationException("User creation");
+           
             }
 
         }
 
 
 
-        //[Route("Login/{username}/{password}")]
-        //[HttpGet]
-        //public IHttpActionResult Login(string username, string password)
-        //{
-        //    int validationStatus = _irepository.LoginUser(username, password);
-
-        //    if (validationStatus == 1)
-        //    {
-        //        return ResponseMessage(Request.CreateResponse(HttpStatusCode.OK, "Login successful."));
-        //    }
-
-
-        //    else if (validationStatus == 0)
-        //    {
-        //        return ResponseMessage(Request.CreateResponse(HttpStatusCode.NotFound, "Sorry. Please enter the correct password."));
-        //        //return BadRequest("Sorry. Invalid Username or Password.");
-        //    }
-
-        //    else
-        //    {
-        //        return ResponseMessage(Request.CreateResponse(HttpStatusCode.NotFound, "Username does not exist."));
-        //    }
-
-        //}
         
         [HttpPut]
         [Route("UpdateUserName")]
-        public IHttpActionResult UpdateUserName(string currentUsername, string newUsername)
+        public IHttpActionResult UpdateUserName(string currentUsername, [FromBody]string newUsername)
         {
            
             
@@ -134,7 +102,7 @@ namespace UserManagement.Controllers
 
                     else
                     {
-                        return ResponseMessage(Request.CreateResponse(HttpStatusCode.InternalServerError, "Username updation failed."));
+                        return ResponseMessage(Request.CreateResponse(HttpStatusCode.InternalServerError, "Username updation failed. Username does not exist."));
                     }
                  }
            
@@ -154,7 +122,17 @@ namespace UserManagement.Controllers
             }
             else
             {
-                return BadRequest("User Role updation failed. Please retry.");
+                if (String.IsNullOrEmpty(currentUsername) || String.IsNullOrEmpty(currentRole) || String.IsNullOrEmpty(newRole))
+                {
+                    var exceptionMessage = new ArgumentNullException("Entered value cannot be null.");
+                    return ResponseMessage(Request.CreateResponse(HttpStatusCode.BadRequest, exceptionMessage));
+                }
+
+                else
+                {
+                    return ResponseMessage(Request.CreateResponse(HttpStatusCode.InternalServerError, "User Role updation failed. Please retry."));
+                }
+               
             }
         }
 
@@ -173,6 +151,13 @@ namespace UserManagement.Controllers
 
             else
             {
+                if (String.IsNullOrEmpty(userName))
+                {
+                    var exceptionMessage = new ArgumentNullException(userName," Username cannot be null.");
+                    return ResponseMessage(Request.CreateResponse(HttpStatusCode.BadRequest, exceptionMessage));
+                }
+                else
+
                 return ResponseMessage(Request.CreateResponse(HttpStatusCode.NotFound, "Requested user " + userName + " is not found."));
             }
 
