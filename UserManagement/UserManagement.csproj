@@ -112,10 +112,10 @@
   <ItemGroup>
     <Compile Include="App_Start\SwaggerConfig.cs" />
     <Compile Include="App_Start\WebApiConfig.cs" />
-    <Compile Include="Controllers\LoginController.cs" />
     <Compile Include="Controllers\UserController.cs" />
     <Compile Include="ConnectionFactory\ConnectionFactory.cs" />
     <Compile Include="ConnectionFactory\IConnectionFactory.cs" />
+    <Compile Include="Entities\User.cs" />
     <Compile Include="Filters\LoggerAttribute.cs" />
     <Compile Include="Filters\UserCreationFailExceptionFilterAttribute.cs" />
     <Compile Include="Global.asax.cs">
@@ -123,6 +123,7 @@
     </Compile>
     <Compile Include="Model\ApplicationModel.cs" />
     <Compile Include="Model\MembershipModel.cs" />
+    <Compile Include="Model\NewUserRequest.cs" />
     <Compile Include="Model\RoleModel.cs" />
     <Compile Include="Model\UserInRoleModel.cs" />
     <Compile Include="Repository\IUserRepository.cs" />

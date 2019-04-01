@@ -4,13 +4,15 @@ using UserManagement.Models;
 using System.Configuration;
 using System.Data.SqlClient;
 using UserManagement.Model;
+using UserManagement.Requests;
+using System.Linq;
 
 namespace UserManagement.Repository
 {
-    enum userCreateStatus { UserCreationFailed, PasswordCreationFailed, RoleCreationFailed, Sucessful,Failure };
-    public class UserRepository : IUserRepository
-        //<UserModel, MembershipModel, RoleModel, UserInRoleModel>
-    { 
+    enum userCreateStatus { UserCreationFailed, PasswordCreationFailed, RoleCreationFailed, Sucessful, Failure };
+    public class UserRepository : IRepository<UserModel>, ISearchUsers, IUpdateUsers
+    //<UserModel, MembershipModel, RoleModel, UserInRoleModel>
+    {
         string connectionString = ConfigurationManager.ConnectionStrings["SqlConString"].ConnectionString;
 
         private static readonly log4net.ILog _log = log4net.LogManager.GetLogger("UserManagementLogger");
@@ -23,10 +25,13 @@ namespace UserManagement.Repository
         /// <param name="password"></param>
         /// <param name="role"></param>
         /// <returns></returns>
-        public int CreateUser(string username, string password, string role)
+        public int Create(UserModel newUser)
         {
-           
-            
+
+            var username = newUser.UserName;
+            var password = newUser.Password;
+            var role = newUser.Roles.First();
+
             string insertUserName = "Insert Into aspnet_Users ([ApplicationId], [UserId], [UserName], [LoweredUserName], [LastActivityDate] )" +
                               "values((select[ApplicationId] from aspnet_Applications where ApplicationName = 'UserApplication'), NEWID(), '"
                               + username + "', LOWER('" + username + "'), GETDATE())";
@@ -34,13 +39,13 @@ namespace UserManagement.Repository
             string insertPassword = "Insert Into aspnet_Membership ([ApplicationId], [UserId], [Password], [PasswordFormat], [PasswordSalt], [IsApproved], [IsLockedOut], [CreateDate]," +
                               " [LastLoginDate],[LastPasswordChangedDate], [LastLockoutDate], [FailedPasswordAttemptCount], [FailedPasswordAttemptWindowStart],[FailedPasswordAnswerAttemptCount], " +
                               "[FailedPasswordAnswerAttemptWindowStart]) values ((select[ApplicationId] from aspnet_Users where UserName = '" + username + "'), " +
-                              "(select[UserId] from aspnet_Users where UserName = '" + username + "'), '" + password + "', 0, "+
+                              "(select[UserId] from aspnet_Users where UserName = '" + username + "'), '" + password + "', 0, " +
                               "'NA', 0, 0, GETDATE(), GETDATE(), GETDATE(), GETDATE(), 0, GETDATE(), 0, GETDATE())";
 
-            
+
             string insertRole = "Insert into [dbo].[aspnet_UsersInRoles] (UserId, RoleId) select u.UserId,r.RoleId from[aspnet_Users] u inner join[aspnet_Roles] r on u.ApplicationId = r.ApplicationId " +
                                 "inner join [dbo].[aspnet_Applications] a on r.ApplicationId=a.ApplicationId where u.[UserName] = '" + username + "' and a.[ApplicationName] = 'UserApplication' " +
-                                "and r.RoleName= '"+role+"'";
+                                "and r.RoleName= '" + role + "'";
 
 
 
@@ -60,11 +65,11 @@ namespace UserManagement.Repository
                             _log.Info("User table not affected");
                             return (int)userCreateStatus.UserCreationFailed;
 
-                          
+
                         }
 
-                        else if(userRowsAffected!=0)
-                        { 
+                        else if (userRowsAffected != 0)
+                        {
                             cmdCreateUser.CommandText = insertPassword;
                             int membesrshipRowsAffected = cmdCreateUser.ExecuteNonQuery();
 
@@ -85,7 +90,7 @@ namespace UserManagement.Repository
                                     return (int)userCreateStatus.RoleCreationFailed;
                                 }
 
-                                
+
                             }
 
                         }
@@ -95,12 +100,12 @@ namespace UserManagement.Repository
                     }
                 }
 
-                
+
             }
             catch (System.Data.SqlClient.SqlException e)
             {
                 // throw new SqlException("");
-                   //pass message to this exception??
+                //pass message to this exception??
             }
             catch (Exception)
             {
@@ -114,9 +119,9 @@ namespace UserManagement.Repository
         }
 
 
-        
 
-        
+
+
         /// <summary>
         /// Method for User login
         /// </summary>
@@ -125,9 +130,9 @@ namespace UserManagement.Repository
         /// <returns></returns>
         public int LoginUser(string username, string password)
         {
-            string userIdCountQuery = "select count(m.[UserId]) from[dbo].[aspnet_Users] u inner join[dbo].[aspnet_Membership] m "+
+            string userIdCountQuery = "select count(m.[UserId]) from[dbo].[aspnet_Users] u inner join[dbo].[aspnet_Membership] m " +
                                      "on u.UserId = m.UserId " +
-                                      " where m.[Password] = '"+ password + "' and u.[UserName] = '"+ username +"' "+
+                                      " where m.[Password] = '" + password + "' and u.[UserName] = '" + username + "' " +
                                   " and u.Applicationid = (select ApplicationId from aspnet_Applications where [ApplicationName] = 'UserApplication')";
 
 
@@ -158,7 +163,7 @@ namespace UserManagement.Repository
                         }
                     }
 
-                   
+
                 }
             }
             catch (SqlException e)
@@ -173,17 +178,17 @@ namespace UserManagement.Repository
 
         }
 
-     /// <summary>
-     /// Updates current Username with new username
-     /// </summary>
-     /// <param name="currentUsername"></param>
-     /// <param name="newUsername"></param>
-     /// <returns></returns>
-    public bool UpdateUserName(string currentUsername, string newUsername)
-    {
+        /// <summary>
+        /// Updates current Username with new username
+        /// </summary>
+        /// <param name="currentUsername"></param>
+        /// <param name="newUsername"></param>
+        /// <returns></returns>
+        public bool UpdateUserName(string currentUsername, string newUsername)
+        {
 
             UserModel user = new UserModel();
-            user.Username = newUsername;
+            user.UserName = newUsername;
 
             string updateUserNameQuery = "update[dbo].[aspnet_Users]" +
                                          "set [UserName] = '" + user.Username + "', [LoweredUserName] = lower('" + user.Username + "')" +
@@ -219,19 +224,19 @@ namespace UserManagement.Repository
             catch (Exception e)
             {
                 throw e;
-            }    
-    }
+            }
+        }
 
 
-    /// <summary>
-    /// Updates current User role with new user role
-    /// </summary>
-    /// <param name="currentUsername"></param>
-    /// <param name="currentRole"></param>
-    /// <param name="newRole"></param>
-    /// <returns></returns>
-    public bool UpdateUserRole(string currentUsername, string currentRole, string newRole)
-    {
+        /// <summary>
+        /// Updates current User role with new user role
+        /// </summary>
+        /// <param name="currentUsername"></param>
+        /// <param name="currentRole"></param>
+        /// <param name="newRole"></param>
+        /// <returns></returns>
+        public bool UpdateUserRole(string currentUsername, string currentRole, string newRole)
+        {
             string updateUserRoleQuery = "update [dbo].[aspnet_UsersInRoles]" +
                                          "set [RoleId] = (select [RoleId] from [dbo].[aspnet_Roles] where [RoleName] = '" + newRole + "'" +
                                          " and [ApplicationId] = (select [ApplicationId] from [dbo].[aspnet_Applications] where [ApplicationName] = 'UserApplication'))" +
@@ -264,24 +269,24 @@ namespace UserManagement.Repository
             }
 
 
-            
-    }
-     
-    /// <summary>
-    /// Deletes a user record
-    /// </summary>
-    /// <param name="userName"></param>
-    /// <param name=""></param>
-    /// <returns></returns>
-    public bool DeleteUser(string userName)
-    {
+
+        }
+
+        /// <summary>
+        /// Deletes a user record
+        /// </summary>
+        /// <param name="userName"></param>
+        /// <param name=""></param>
+        /// <returns></returns>
+        public bool DeleteUser(string userName)
+        {
             UserModel user = new UserModel();
 
             Guid userIdGuid;
 
-            string userIdQuery = "select u.UserId from[dbo].[aspnet_Users] u inner join[dbo].[aspnet_Membership] m on u.UserId = m.UserId "+
-                                    "inner join[dbo].[aspnet_Applications] a on u.ApplicationId = a.ApplicationId "+
-                                    "where u.UserName='"+ userName + "' and "+
+            string userIdQuery = "select u.UserId from[dbo].[aspnet_Users] u inner join[dbo].[aspnet_Membership] m on u.UserId = m.UserId " +
+                                    "inner join[dbo].[aspnet_Applications] a on u.ApplicationId = a.ApplicationId " +
+                                    "where u.UserName='" + userName + "' and " +
                                     "a.ApplicationId = (select ApplicationId from [dbo].[aspnet_Applications] where ApplicationName = 'UserApplication')";
 
             //string deleteUserFromUsersInRolesQuery = "delete from aspnet_UsersInRoles where UserId = '" + user.UserID + "'";
@@ -337,27 +342,27 @@ namespace UserManagement.Repository
                 throw e;
             }
 
-    }
+        }
 
-   
+
 
         /// <summary>
         /// Get users with a particular role corresponding to a particular application name -- check
         /// </summary>
         /// <param name="role"></param>
         /// <returns></returns>
-    public IEnumerable<string> GetUsersByRole(string role)
-    {
-            string getUsersByRoleQuery = "select u.UserName from dbo.aspnet_Users u inner join dbo.aspnet_UsersInRoles ur "+
-                                         "on u.UserId = ur.UserId inner join[dbo].[aspnet_Applications] a "+
-                                       "on u.ApplicationId = a.ApplicationId "+
-                                       "where  u.ApplicationId = (select ApplicationId from aspnet_Applications where[ApplicationName] = 'UserApplication') "+
-                                         "and ur.RoleId in (select[RoleId] from [dbo].[aspnet_Roles] where[RoleName] = '"+ role +"') "+
+        public IEnumerable<string> GetUsersByRole(string role)
+        {
+            string getUsersByRoleQuery = "select u.UserName from dbo.aspnet_Users u inner join dbo.aspnet_UsersInRoles ur " +
+                                         "on u.UserId = ur.UserId inner join[dbo].[aspnet_Applications] a " +
+                                       "on u.ApplicationId = a.ApplicationId " +
+                                       "where  u.ApplicationId = (select ApplicationId from aspnet_Applications where[ApplicationName] = 'UserApplication') " +
+                                         "and ur.RoleId in (select[RoleId] from [dbo].[aspnet_Roles] where[RoleName] = '" + role + "') " +
                                          "order by u.UserName";
 
             List<string> usernameList = new List<string>();
 
-        
+
 
             try
             {
@@ -381,19 +386,34 @@ namespace UserManagement.Repository
             }
 
 
-             catch (Exception e)
+            catch (Exception e)
             {
                 throw e;
             }
 
-            
+
         }
 
-    public IEnumerable<UserModel> GetUsersBySearchKeyword(string searchKeyword)
-    {
-        throw new NotImplementedException();
-    }
+        public IEnumerable<UserModel> GetUsersBySearchKeyword(string searchKeyword)
+        {
+            throw new NotImplementedException();
+        }
 
-      
-   }
+
+
+        public bool Update(UserModel t)
+        {
+            throw new NotImplementedException();
+        }
+
+        public bool Delete(int id)
+        {
+            throw new NotImplementedException();
+        }
+
+        public IEnumerable<UserModel> GetAll()
+        {
+            return new List<UserModel>();
+        }
+    }
 }

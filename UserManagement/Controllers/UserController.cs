@@ -13,6 +13,7 @@ using System.Reflection;
 using System.Resources;
 using System.Globalization;
 using UserManagement.Filters;
+using UserManagement.Requests;
 
 namespace UserManagement.Controllers
 {
@@ -20,37 +21,36 @@ namespace UserManagement.Controllers
     [Logger]
     public class UserController : ApiController
     {
-        IUserRepository _irepository;
+        IRepository<UserModel> _userrepository;
+        ISearchUsers _searchUserRepository;
+        IUpdateUsers _updateUserRepository;
 
         //ResourceManager rm = new ResourceManager("UsingRESX.UserControllerMessages",
         //        Assembly.GetExecutingAssembly());
 
-        public UserController(IUserRepository irepository)
+        public UserController(IRepository<UserModel> irepository, 
+            ISearchUsers searchUserRepository, 
+            IUpdateUsers updateUserRepository)
         {
-            _irepository = irepository;
+            _userrepository = irepository;
+            _searchUserRepository = searchUserRepository;
+            _updateUserRepository = updateUserRepository;
         }
-        
 
         [Route("Create")]
         [HttpPost]
-        public IHttpActionResult UserCreation([FromBody]JObject data)
+        public IHttpActionResult UserCreation([FromBody]NewUserRequest newUser)
         {
             try
             {
-
-                UserModel user = new UserModel();
-                MembershipModel membership = new MembershipModel();
-                RoleModel role = new RoleModel();
-
-                user.Username = (string)data["Username"];
-                membership.Password = (string)data["Password"];
-                role.RoleName = (string)data["RoleName"];
-
-                var creationStatus = _irepository.CreateUser(user.Username, membership.Password, role.RoleName);
+                var user = new UserModel();
+                user.UserName = newUser.UserName;
+                user.Password = newUser.Password;
+                var creationStatus = _userrepository.CreateUser(newUser);
 
                 if (creationStatus == 0)
                 {
-                    return ResponseMessage(Request.CreateResponse(HttpStatusCode.InternalServerError, "User creation failed"));
+                    return InternalServerError(new Exception("User creation failed"));
                     // return ResponseMessage(Request.CreateResponse(HttpStatusCode.Created, rm.GetString("creationSuccessful")));
 
                 }
@@ -78,9 +78,6 @@ namespace UserManagement.Controllers
             }
 
         }
-
-
-
         
         [HttpPut]
         [Route("UpdateUserName")]
@@ -88,7 +85,7 @@ namespace UserManagement.Controllers
         {
            
             
-                bool updateUsernameStatus = _irepository.UpdateUserName(currentUsername, newUsername);
+                bool updateUsernameStatus = _userrepository.UpdateUserName(currentUsername, newUsername);
 
                 if (updateUsernameStatus)
                 {
@@ -114,7 +111,7 @@ namespace UserManagement.Controllers
         [Route("UpdateUserRole")]
         public IHttpActionResult UpdateUserRole(string currentUsername, string currentRole, string newRole)
         {
-            bool updateUserRoleStatus = _irepository.UpdateUserRole(currentUsername, currentRole, newRole);
+            bool updateUserRoleStatus = _userrepository.UpdateUserRole(currentUsername, currentRole, newRole);
 
             //how do we pass a variable value in the create respone method
             //like <User025> role has been updated successully to <HR>
@@ -143,7 +140,7 @@ namespace UserManagement.Controllers
         [HttpDelete]
         public IHttpActionResult Delete(string userName)
         {
-            bool deleteUserStatus = _irepository.DeleteUser(userName);
+            bool deleteUserStatus = _userrepository.DeleteUser(userName);
            // string Userid = UserId;
 
             if(deleteUserStatus)
@@ -169,7 +166,7 @@ namespace UserManagement.Controllers
         [HttpGet]
         public IHttpActionResult GetUsersByRole(string role)
         {
-            IEnumerable<string> usersList = _irepository.GetUsersByRole(role);
+            IEnumerable<string> usersList = _userrepository.GetUsersByRole(role);
             //Object[] username = _irepositoryGetUsersByRole(Role);
             var message = string.Format("List of users with {0} role {1}", role, usersList);
 
