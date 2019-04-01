@@ -3,11 +3,13 @@ using System.Collections.Generic;
 using UserManagement.Models;
 using System.Configuration;
 using System.Data.SqlClient;
+using UserManagement.Model;
 
 namespace UserManagement.Repository
 {
     enum userCreateStatus { UserCreationFailed, PasswordCreationFailed, RoleCreationFailed, Sucessful,Failure };
     public class UserRepository : IUserRepository
+        //<UserModel, MembershipModel, RoleModel, UserInRoleModel>
     { 
         string connectionString = ConfigurationManager.ConnectionStrings["SqlConString"].ConnectionString;
 

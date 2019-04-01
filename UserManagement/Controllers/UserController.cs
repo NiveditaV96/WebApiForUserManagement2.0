@@ -12,10 +12,12 @@ using UserManagement.Repository;
 using System.Reflection;
 using System.Resources;
 using System.Globalization;
+using UserManagement.Filters;
 
 namespace UserManagement.Controllers
 {
     [RoutePrefix("api/User")]
+    [Logger]
     public class UserController : ApiController
     {
         IUserRepository _irepository;

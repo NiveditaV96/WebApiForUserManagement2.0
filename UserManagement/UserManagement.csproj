@@ -116,7 +116,8 @@
     <Compile Include="Controllers\UserController.cs" />
     <Compile Include="ConnectionFactory\ConnectionFactory.cs" />
     <Compile Include="ConnectionFactory\IConnectionFactory.cs" />
-    <Compile Include="ExceptionFilters\UserCreationFailExceptionFilterAttribute.cs" />
+    <Compile Include="Filters\LoggerAttribute.cs" />
+    <Compile Include="Filters\UserCreationFailExceptionFilterAttribute.cs" />
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
