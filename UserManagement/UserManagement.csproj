@@ -124,10 +124,13 @@
     <Compile Include="Model\ApplicationModel.cs" />
     <Compile Include="Model\MembershipModel.cs" />
     <Compile Include="Model\RoleModel.cs" />
+    <Compile Include="Model\User.cs" />
     <Compile Include="Model\UserInRoleModel.cs" />
-    <Compile Include="Repository\IUserRepository.cs" />
+    <Compile Include="Repository\IRepository.cs" />
     <Compile Include="Model\UserModel.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Repository\ILoginRepository.cs" />
+    <Compile Include="Repository\LoginRepository.cs" />
     <Compile Include="Repository\UserRepository.cs" />
     <Compile Include="Resource\UserControllerMessages.Designer.cs">
       <AutoGen>True</AutoGen>

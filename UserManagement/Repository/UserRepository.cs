@@ -8,7 +8,7 @@ using UserManagement.Model;
 namespace UserManagement.Repository
 {
     enum userCreateStatus { UserCreationFailed, PasswordCreationFailed, RoleCreationFailed, Sucessful,Failure };
-    public class UserRepository : IUserRepository
+    public class UserRepository : ILoginRepository<User>, IUpdateUsersRepository, IFindUsersRepository
         //<UserModel, MembershipModel, RoleModel, UserInRoleModel>
     { 
         string connectionString = ConfigurationManager.ConnectionStrings["SqlConString"].ConnectionString;
@@ -23,10 +23,14 @@ namespace UserManagement.Repository
         /// <param name="password"></param>
         /// <param name="role"></param>
         /// <returns></returns>
-        public int CreateUser(string username, string password, string role)
+        public int Create(User user)
         {
-           
-            
+
+            var username = user.Username;
+            var password = user.Password;
+            var role = user.RoleName;
+
+
             string insertUserName = "Insert Into aspnet_Users ([ApplicationId], [UserId], [UserName], [LoweredUserName], [LastActivityDate] )" +
                               "values((select[ApplicationId] from aspnet_Applications where ApplicationName = 'UserApplication'), NEWID(), '"
                               + username + "', LOWER('" + username + "'), GETDATE())";
@@ -116,63 +120,7 @@ namespace UserManagement.Repository
 
         
 
-        
-        /// <summary>
-        /// Method for User login
-        /// </summary>
-        /// <param name="username"></param>
-        /// <param name="password"></param>
-        /// <returns></returns>
-        public int LoginUser(string username, string password)
-        {
-            string userIdCountQuery = "select count(m.[UserId]) from[dbo].[aspnet_Users] u inner join[dbo].[aspnet_Membership] m "+
-                                     "on u.UserId = m.UserId " +
-                                      " where m.[Password] = '"+ password + "' and u.[UserName] = '"+ username +"' "+
-                                  " and u.Applicationid = (select ApplicationId from aspnet_Applications where [ApplicationName] = 'UserApplication')";
-
-
-            try
-            {
-                using (SqlConnection con = new SqlConnection(connectionString))
-                {
-
-                    using (SqlCommand cmd1 = new SqlCommand(userIdCountQuery, con))
-                    //SqlCommand cmd2 = new SqlCommand(passwordQuery, con);
-                    {
-                        con.Open();
-
-                        int userIdRowCount = (int)cmd1.ExecuteScalar();
-                        //int pwdRowCount = (int)cmd2.ExecuteScalar();
-
-                        //valid user credentials
-                        if (userIdRowCount == 1)
-                        {
-
-                            return 1;
-                        }
-
-                        //invalid credentials
-                        else
-                        {
-                            return 0;
-                        }
-                    }
-
-                   
-                }
-            }
-            catch (SqlException e)
-            {
-                throw new Exception(e.Message);
-            }
-
-            catch (Exception e)
-            {
-                throw new Exception(e.Message);
-            }
-
-        }
-
+       
      /// <summary>
      /// Updates current Username with new username
      /// </summary>
@@ -273,9 +221,10 @@ namespace UserManagement.Repository
     /// <param name="userName"></param>
     /// <param name=""></param>
     /// <returns></returns>
-    public bool DeleteUser(string userName)
+    public bool Delete(User user)
     {
-            UserModel user = new UserModel();
+            //UserModel user = new UserModel();
+            var userName = user.Username;
 
             Guid userIdGuid;
 

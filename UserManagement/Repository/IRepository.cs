@@ -7,20 +7,24 @@ using UserManagement.Models;
 
 namespace UserManagement.Repository
 {
-    public interface IUserRepository
+    public interface IRepository<T> where T : class
     {
-        int CreateUser(string username, string password, string role);
+        int Create(T t);
+        bool Delete(T t);
+       
 
-        int LoginUser(string username, string password);
+    }
 
+    public interface IUpdateUsersRepository
+    {
         bool UpdateUserName(string currentUsername, string newUsername);
         bool UpdateUserRole(string currentUsername, string currentRole, string newRole);
+    }
 
+    public interface IFindUsersRepository
+    {
         IEnumerable<string> GetUsersByRole(string role);
-
         IEnumerable<UserModel> GetUsersBySearchKeyword(string searchKeyword);
-
-        bool DeleteUser(string userName);
     }
 
     //public interface IRepository<T1,T2,T3,T4> where T1:class

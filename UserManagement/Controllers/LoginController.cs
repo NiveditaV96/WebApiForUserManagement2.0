@@ -4,24 +4,25 @@ using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Web.Http;
+using UserManagement.Model;
 using UserManagement.Repository;
 
 namespace UserManagement.Controllers
 {
     public class LoginController : ApiController
     {
-        IUserRepository _irepository;
+        ILoginRepository<User> _loginrepository;
 
-        public LoginController(IUserRepository irepository)
+        public LoginController(ILoginRepository<User> loginrepository)
         {
-            _irepository = irepository;
+            _loginrepository = loginrepository;
         }
 
         [Route("UserLogin")]
         [HttpPost]
-        public IHttpActionResult UserLogin(string username, string password)
+        public IHttpActionResult UserLogin(User user)
         {
-            int validationStatus = _irepository.LoginUser(username, password);
+            int validationStatus = _loginrepository.Login(user);
 
             if (validationStatus == 1)
             {

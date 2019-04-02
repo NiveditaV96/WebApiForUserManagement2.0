@@ -15,22 +15,22 @@ namespace UserManagement
     {
         public static void Register(HttpConfiguration config)
         {
-            //// Web API configuration and services
-            //var builder = new ContainerBuilder();
+            // Web API configuration and services
+            var builder = new ContainerBuilder();
 
-            //// Register your Web API controllers.
-            //builder.RegisterApiControllers(Assembly.GetExecutingAssembly());
+            // Register your Web API controllers.
+            builder.RegisterApiControllers(Assembly.GetExecutingAssembly());
 
-            //// To register the components with the services offered
-            //builder.RegisterType<UserModel>();
-            //builder.RegisterType<UserRepository>().As<IUserRepository>();
-          
-            //// Set the dependency resolver to be Autofac.
-            //var container = builder.Build();
+            // To register the components with the services offered
+            builder.RegisterType<UserModel>();
+            builder.RegisterType<UserRepository>().As<IUserRepository>();
 
-            ////check this dot resolve all the contents of the container at a time
-            //// resolve as when its required
-            //config.DependencyResolver = new AutofacWebApiDependencyResolver(container);
+            // Set the dependency resolver to be Autofac.
+            var container = builder.Build();
+
+            //check this dot resolve all the contents of the container at a time
+            // resolve as when its required
+            config.DependencyResolver = new AutofacWebApiDependencyResolver(container);
 
             //ResourceManager rm = new ResourceManager("UsingRESX.UserControllerMessages",
             //    Assembly.GetExecutingAssembly());

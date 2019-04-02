@@ -20,33 +20,29 @@ namespace UserManagement.Controllers
     [Logger]
     public class UserController : ApiController
     {
-        IUserRepository _irepository;
+        IRepository<User> _userRepository;
+        IUpdateUsersRepository _updateUserRepository;
+        IFindUsersRepository _findUserRepository;
 
         //ResourceManager rm = new ResourceManager("UsingRESX.UserControllerMessages",
         //        Assembly.GetExecutingAssembly());
 
-        public UserController(IUserRepository irepository)
+        public UserController(IRepository<User> userRepository, IUpdateUsersRepository updateUserRepository, IFindUsersRepository findUserRepository)
         {
-            _irepository = irepository;
+            _userRepository = userRepository;
+            _updateUserRepository = updateUserRepository;
+           _findUserRepository = findUserRepository;
+
         }
         
 
         [Route("Create")]
         [HttpPost]
-        public IHttpActionResult UserCreation([FromBody]JObject data)
+        public IHttpActionResult NewUser([FromBody]User user)
         {
             try
             {
-
-                UserModel user = new UserModel();
-                MembershipModel membership = new MembershipModel();
-                RoleModel role = new RoleModel();
-
-                user.Username = (string)data["Username"];
-                membership.Password = (string)data["Password"];
-                role.RoleName = (string)data["RoleName"];
-
-                var creationStatus = _irepository.CreateUser(user.Username, membership.Password, role.RoleName);
+                var creationStatus = _userRepository.Create(user);
 
                 if (creationStatus == 0)
                 {
@@ -88,7 +84,7 @@ namespace UserManagement.Controllers
         {
            
             
-                bool updateUsernameStatus = _irepository.UpdateUserName(currentUsername, newUsername);
+                bool updateUsernameStatus = _updateUserRepository.UpdateUserName(currentUsername, newUsername);
 
                 if (updateUsernameStatus)
                 {
@@ -114,7 +110,7 @@ namespace UserManagement.Controllers
         [Route("UpdateUserRole")]
         public IHttpActionResult UpdateUserRole(string currentUsername, string currentRole, string newRole)
         {
-            bool updateUserRoleStatus = _irepository.UpdateUserRole(currentUsername, currentRole, newRole);
+            bool updateUserRoleStatus = _updateUserRepository.UpdateUserRole(currentUsername, currentRole, newRole);
 
             //how do we pass a variable value in the create respone method
             //like <User025> role has been updated successully to <HR>
@@ -141,26 +137,26 @@ namespace UserManagement.Controllers
 
         [Route("Delete")]
         [HttpDelete]
-        public IHttpActionResult Delete(string userName)
+        public IHttpActionResult Delete(User user)
         {
-            bool deleteUserStatus = _irepository.DeleteUser(userName);
+            bool deleteUserStatus = _userRepository.Delete(user);
            // string Userid = UserId;
 
             if(deleteUserStatus)
             {
-                return ResponseMessage(Request.CreateResponse(HttpStatusCode.OK, "Requested user " + userName + " has been deleted."));
+                return ResponseMessage(Request.CreateResponse(HttpStatusCode.OK, "Requested user " + user.Username + " has been deleted."));
             }
 
             else
             {
-                if (String.IsNullOrEmpty(userName))
+                if (String.IsNullOrEmpty(user.Username))
                 {
-                    var exceptionMessage = new ArgumentNullException(userName," Username cannot be null.");
+                    var exceptionMessage = new ArgumentNullException(user.Username, " Username cannot be null.");
                     return ResponseMessage(Request.CreateResponse(HttpStatusCode.BadRequest, exceptionMessage));
                 }
                 else
 
-                return ResponseMessage(Request.CreateResponse(HttpStatusCode.NotFound, "Requested user " + userName + " is not found."));
+                return ResponseMessage(Request.CreateResponse(HttpStatusCode.NotFound, "Requested user " + user.Username + " is not found."));
             }
 
         }
@@ -169,7 +165,7 @@ namespace UserManagement.Controllers
         [HttpGet]
         public IHttpActionResult GetUsersByRole(string role)
         {
-            IEnumerable<string> usersList = _irepository.GetUsersByRole(role);
+            IEnumerable<string> usersList = _findUserRepository.GetUsersByRole(role);
             //Object[] username = _irepositoryGetUsersByRole(Role);
             var message = string.Format("List of users with {0} role {1}", role, usersList);
 
