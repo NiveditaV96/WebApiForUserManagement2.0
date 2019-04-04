@@ -2,3 +2,17 @@
 2019-03-28 12:10:51,166 INFO UserManagementLogger - Received request for Updating Username
 2019-03-28 12:34:55,410 INFO UserManagementLogger - Received request for Updating Username
 2019-04-02 12:03:52,639 INFO UserManagementLogger - Action Method UserCreation executing at 4/2/2019
+2019-04-02 17:52:51,985 INFO UserManagementLogger - Action Method NewUser executing at 4/2/2019
+2019-04-02 17:53:04,065 INFO UserManagementLogger - Action Method NewUser executing at 4/2/2019
+2019-04-03 09:30:18,397 INFO UserManagementLogger - Action Method GetUsersByRole executing at 4/3/2019
+2019-04-03 09:31:05,184 INFO UserManagementLogger - user list based on role to be displayed.
+2019-04-03 09:32:49,994 INFO UserManagementLogger - Action Method GetUsersByRole executing at 4/3/2019
+2019-04-03 09:33:29,271 INFO UserManagementLogger - user list based on role to be displayed.
+2019-04-03 09:35:49,804 INFO UserManagementLogger - Action Method GetUsersByRole executing at 4/3/2019
+2019-04-03 09:36:04,411 INFO UserManagementLogger - user list based on role to be displayed.
+2019-04-03 10:07:45,464 INFO UserManagementLogger - Action Method GetUsersByRole executing at 4/3/2019
+2019-04-03 10:07:54,970 INFO UserManagementLogger - user list based on role to be displayed.
+2019-04-03 10:10:26,631 INFO UserManagementLogger - Action Method GetUsersByRole executing at 4/3/2019
+2019-04-03 10:10:38,688 INFO UserManagementLogger - user list based on role to be displayed.
+2019-04-03 10:11:47,541 INFO UserManagementLogger - Action Method GetUsersByRole executing at 4/3/2019
+2019-04-03 10:11:52,429 INFO UserManagementLogger - user list based on role to be displayed.

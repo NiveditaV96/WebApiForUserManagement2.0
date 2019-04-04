@@ -7,8 +7,8 @@ using UserManagement.Model;
 
 namespace UserManagement.Repository
 {
-    enum userCreateStatus { UserCreationFailed, PasswordCreationFailed, RoleCreationFailed, Sucessful,Failure };
-    public class UserRepository : ILoginRepository<User>, IUpdateUsersRepository, IFindUsersRepository
+    enum userCreateStatus { UserCreationFailed, PasswordCreationFailed, RoleCreationFailed, Sucessful, Failure };
+    public class UserRepository : IRepository<User>, IUpdateUsersRepository, IFindUsersRepository
         //<UserModel, MembershipModel, RoleModel, UserInRoleModel>
     { 
         string connectionString = ConfigurationManager.ConnectionStrings["SqlConString"].ConnectionString;

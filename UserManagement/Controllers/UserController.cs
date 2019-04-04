@@ -13,6 +13,8 @@ using System.Reflection;
 using System.Resources;
 using System.Globalization;
 using UserManagement.Filters;
+using System.Threading.Tasks;
+using UserManagement.ExceptionFilters;
 
 namespace UserManagement.Controllers
 {
@@ -27,7 +29,9 @@ namespace UserManagement.Controllers
         //ResourceManager rm = new ResourceManager("UsingRESX.UserControllerMessages",
         //        Assembly.GetExecutingAssembly());
 
-        public UserController(IRepository<User> userRepository, IUpdateUsersRepository updateUserRepository, IFindUsersRepository findUserRepository)
+        public UserController(IRepository<User> userRepository, 
+            IUpdateUsersRepository updateUserRepository,
+            IFindUsersRepository findUserRepository)
         {
             _userRepository = userRepository;
             _updateUserRepository = updateUserRepository;
@@ -36,8 +40,9 @@ namespace UserManagement.Controllers
         }
         
 
-        [Route("Create")]
+        [Route("SignUp")]
         [HttpPost]
+        [UserCreationFailExceptionFilter]
         public IHttpActionResult NewUser([FromBody]User user)
         {
             try
@@ -67,9 +72,9 @@ namespace UserManagement.Controllers
                     return ResponseMessage(Request.CreateResponse(HttpStatusCode.Created, "User created successfully."));
                 }
             }
-            catch(Exception)
+            catch(Exception ex)
             {
-                throw;
+                throw ex;
            
             }
 
@@ -151,7 +156,7 @@ namespace UserManagement.Controllers
             {
                 if (String.IsNullOrEmpty(user.Username))
                 {
-                    var exceptionMessage = new ArgumentNullException(user.Username, " Username cannot be null.");
+                    var exceptionMessage = new ArgumentNullException(user.Username, "Username cannot be null.");
                     return ResponseMessage(Request.CreateResponse(HttpStatusCode.BadRequest, exceptionMessage));
                 }
                 else
@@ -161,16 +166,26 @@ namespace UserManagement.Controllers
 
         }
 
-        [Route("GetUsersByRole/{role}")]
-        [HttpGet]
+        [Route("FindUserByRole/{role}")]
         public IHttpActionResult GetUsersByRole(string role)
         {
-            IEnumerable<string> usersList = _findUserRepository.GetUsersByRole(role);
+            
+            IEnumerable<string> users = _findUserRepository.GetUsersByRole(role);
             //Object[] username = _irepositoryGetUsersByRole(Role);
-            var message = string.Format("List of users with {0} role {1}", role, usersList);
+            var message = string.Format("List of users with {0} role {1}", role, users);
+            if (users.Count() > 0)
+            {
+                return Ok(users);
+            }
+            else
+            {
+                return BadRequest("No Roles Found ");              
+            }
+        }
 
-            return ResponseMessage(Request.CreateResponse(HttpStatusCode.OK, message));
-
+        public async Task<IHttpActionResult> GetUsersByRoleAsync(string role)
+        {
+            return await Task.FromResult(GetUsersByRole(role));
         }
     }
 }

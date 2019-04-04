@@ -21,7 +21,22 @@ namespace UserManagement.Filters
 
         public override void OnActionExecuted(HttpActionExecutedContext actionExecutedContext)
         {
-            Trace.WriteLine(string.Format("Action Method {0} executed at {1}", actionExecutedContext.ActionContext.ActionDescriptor.ActionName, DateTime.Now.ToShortDateString()), "Web API Logs");
+            _log.Info(string.Format("Action Method {0} executing at {1}", actionExecutedContext.ActionContext.ActionDescriptor.ActionName, DateTime.Now.ToShortDateString()));
+
+            //Trace.WriteLine(string.Format("Action Method {0} executed at {1}", actionExecutedContext.ActionContext.ActionDescriptor.ActionName, DateTime.Now.ToShortDateString()), "Web API Logs");
         }
+
+        //present in mvc
+
+        //public override void OnResultExecuting(ResultExecutingContext filterContext)
+        //{
+        //   // Log("OnResultExecuting", filterContext.RouteData);
+        //}
+
+        //public override void OnResultExecuted(ResultExecutedContext filterContext)
+        //{
+        //    //Log("OnResultExecuted", filterContext.RouteData);
+        //}
+
     }
 }

@@ -11,18 +11,18 @@ namespace UserManagement.Controllers
 {
     public class LoginController : ApiController
     {
-        ILoginRepository<User> _loginrepository;
+        ILoginRepository<User> _loginRepository;
 
-        public LoginController(ILoginRepository<User> loginrepository)
+        public LoginController(ILoginRepository<User> loginRepository)
         {
-            _loginrepository = loginrepository;
+            _loginRepository = loginRepository;
         }
 
         [Route("UserLogin")]
         [HttpPost]
-        public IHttpActionResult UserLogin(User user)
+        public IHttpActionResult Login(User user)
         {
-            int validationStatus = _loginrepository.Login(user);
+            int validationStatus = _loginRepository.Login(user);
 
             if (validationStatus == 1)
             {

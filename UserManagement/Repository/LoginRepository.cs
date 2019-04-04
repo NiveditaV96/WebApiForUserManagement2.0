@@ -8,6 +8,7 @@ using UserManagement.Model;
 
 namespace UserManagement.Repository
 {
+
     public class LoginRepository : ILoginRepository<User>
     {
 
